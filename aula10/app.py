@@ -1,4 +1,5 @@
 import mysql.connector as connector
+import pandas as pd
 # sistema de concessionaria
 
 
@@ -28,23 +29,38 @@ def insert_car(cnx, car):
     cnx.commit()
 
 
-def update_car(cnx, car):
-    pass
+def update_car(cnx, id_carro, car):
+    cursor = cnx.cursor()
+    update = ('UPDATE carro SET marca = %s , modelo = %s, ano = %s, valor = %s WHERE id =' + id_carro)
+    print (update)
+    data = (car['marca'], car['modelo'], car['ano'], car['valor'])
+    cursor.execute(update, data)
+    cnx.commit()
 
 
-def delete_car(cnx, car):
-    pass
+def delete_car(cnx, id_carro):
+    cursor = cnx.cursor()
+    delete_c = ('DELETE FROM carro WHERE id =' + id_carro)
+    cursor.execute(delete_c)
+    cnx.commit()
 
 
-def search_car(cnx, id):
-    pass
+def search_car(cnx, modelo):
+    cursor = cnx.cursor()
+    query = ('select * from carro where modelo like "' + modelo + '"')
+    cursor.execute(query)
+    df = pd.DataFrame(list(cursor), columns = ['ID', 'Marca', 'Modelo','Ano', 'Valor'])
+    df = df.sort_values('ID')
+    return df
 
 
 def lista_carros(cnx):
     cursor = cnx.cursor()
     query = ('select * from carro')
     cursor.execute(query)
-    return list(cursor)
+    df = pd.DataFrame(list(cursor), columns = ['ID', 'Marca', 'Modelo','Ano', 'Valor'])
+    df = df.sort_values('ID')
+    return df
 
 
 def desconnect(cnx):
@@ -52,34 +68,76 @@ def desconnect(cnx):
 
 
 if __name__ == '__main__':
+    
     connector = connection()
     create_table(connector)
-    print('1 - Cadastrar carro')
-    print('2 - Atualizar carro')
-    print('3 - Buscar carro')
-    print('4 - Deletar carro')
-    print('5 - Listar todos os carros')
-    option = int(input('Escolha um numero da opção: '))
+    option = 10
 
-    if option == 1:
-        marca = input('Digite a marca do carro: ')
-        modelo = input('Digite a modelo do carro: ')
-        ano = input('Digite a ano do carro: ')
-        valor = input('Digite a valor do carro: ')
-        insert_car(connector, {
-            'marca': marca,
-            'modelo': modelo,
-            'ano': ano,
-            'valor': valor
-        })
-    elif option == 2:
-        marca = input('Digite o modelo do carro que quer alterar: ')
-    elif option == 3:
-        carro = input('Digite o modelo do carro que quer exibir: ')
-    elif option == 4:
-        carro = input('Digite o modelo do carro que quer deletar: ')
-    elif option == 5:
-        print(lista_carros(connector))
-    else:
-        print('Digite uma opção valida, na proxima vez!')
+    while option>0:
+        
+        print()
+        print('0 - Sair')
+        print('1 - Cadastrar carro')
+        print('2 - Atualizar carro')
+        print('3 - Buscar carro')
+        print('4 - Deletar carro')
+        print('5 - Listar todos os carros')
+        option = int(input('Escolha um numero da opção: '))
+        print()
+
+        if option == 1:
+            marca = input('Digite a marca do carro: ')
+            modelo = input('Digite a modelo do carro: ')
+            ano = input('Digite a ano do carro: ')
+            valor = input('Digite a valor do carro: ')
+            insert_car(connector, {
+                'marca': marca,
+                'modelo': modelo,
+                'ano': ano,
+                'valor': valor
+            })
+        elif option == 2:
+            
+            print(lista_carros(connector))
+            print()
+
+
+            id_carro = input('Digite o ID do carro que quer alterar: ')
+            print()
+
+            marca = input('Digite a marca do carro: ')
+            modelo = input('Digite a modelo do carro: ')
+            ano = input('Digite a ano do carro: ')
+            valor = input('Digite a valor do carro: ')
+
+            update_car(connector, id_carro, {
+                'marca': marca,
+                'modelo': modelo,
+                'ano': ano,
+                'valor': valor
+            })
+
+        elif option == 3:
+            carro = input('Digite o modelo do carro que quer exibir: ')
+            print()
+            
+            print(search_car(connector,carro))
+
+
+        elif option == 4:
+            
+            print(lista_carros(connector))
+            print()
+
+            id_carro = input('Digite o ID do carro que quer excluir: ')
+
+            delete_car(connector,id_carro)
+
+        elif option == 5:
+            
+            print(lista_carros(connector))
+        elif option == 0:
+            pass
+        else:
+            print('Digite uma opção valida, na proxima vez!')
     desconnect(connector)
