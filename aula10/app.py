@@ -53,7 +53,6 @@ def search_car(cnx, modelo):
     df = df.sort_values('ID')
     return df
 
-
 def lista_carros(cnx):
     cursor = cnx.cursor()
     query = ('select * from carro')
@@ -65,7 +64,6 @@ def lista_carros(cnx):
 
 def desconnect(cnx):
     cnx.close()
-
 
 if __name__ == '__main__':
     
